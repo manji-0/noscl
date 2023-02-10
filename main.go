@@ -19,7 +19,7 @@ Usage:
   noscl sign <event-json>
   noscl verify <event-json>
   noscl public
-  noscl publish [--reference=<id>...] [--profile=<id>...] <content>
+  noscl publish [--kind=<kind>] [--reference=<id>...] [--profile=<id>...] <content>
   noscl message [--reference=<id>...] <id> <content>
   noscl metadata --name=<name> [--about=<about>] [--picture=<picture>]
   noscl profile <key>
@@ -28,6 +28,7 @@ Usage:
   noscl event <id>
   noscl share-contacts
   noscl key-gen
+  noscl find-key <pattern>
   noscl relay
   noscl relay add <url>
   noscl relay remove <url>
@@ -87,6 +88,8 @@ func main() {
 		shareContacts(opts)
 	case opts["key-gen"].(bool):
 		keyGen(opts)
+  case opts["find-key"].(bool):
+    findKey(opts)
 	case opts["metadata"].(bool):
 		setMetadata(opts)
 	case opts["profile"].(bool):

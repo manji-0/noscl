@@ -29,6 +29,12 @@ func publish(opts docopt.Opts) {
 		tags = append(tags, nostr.StringList{"e", ref})
 	}
 
+  kind, err := opts.Int("--kind")
+
+  if err != nil {
+    kind = nostr.KindTextNote
+  }
+
 	profiles, err := optSlice(opts, "--profile")
 
 	if err != nil {
@@ -41,7 +47,7 @@ func publish(opts docopt.Opts) {
 
 	event, statuses, err := pool.PublishEvent(&nostr.Event{
 		CreatedAt: time.Now(),
-		Kind:      nostr.KindTextNote,
+		Kind:      kind,
 		Tags:      tags,
 		Content:   opts["<content>"].(string),
 	})

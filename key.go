@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+  "regexp"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/docopt/docopt-go"
@@ -41,7 +42,7 @@ func showPublicKey(opts docopt.Opts) {
 }
 
 func getPubKey(privateKey string) string {
-	if keyb, err := hex.DecodeString(config.PrivateKey); err != nil {
+	if keyb, err := hex.DecodeString(privateKey); err != nil {
 		log.Printf("Error decoding key from hex: %s\n", err.Error())
 		return ""
 	} else {
@@ -50,23 +51,50 @@ func getPubKey(privateKey string) string {
 	}
 }
 
+func findKey(opts docopt.Opts) {
+  r := regexp.MustCompile(opts["<pattern>"].(string))
+
+  for {
+    sec, err := _keyGen()
+
+    if err != nil {
+      continue
+    }
+
+    pub := getPubKey(sec)
+
+    if r.MatchString(pub) {
+      fmt.Println(`{"status": "success", "pubkey": "` + pub + `", "seckey": ` + sec + `"}`)
+      break
+    } else {
+      fmt.Println(`{"status": "failed", "pubkey": "` + pub + `", "seckey": ` + sec + `"}`)
+    }
+  }
+}
+
 func keyGen(opts docopt.Opts) {
-	seedWords, err := nip06.GenerateSeedWords()
+  sk, err := _keyGen()
 
-	if err != nil {
-		log.Println(err)
-		return
-	}
+  if err != nil {
+    return
+  }
 
-	seed := nip06.SeedFromWords(seedWords)
+	fmt.Println(sk)
+}
 
-	sk, err := nip06.PrivateKeyFromSeed(seed)
+func _keyGen() (string, error) {
+  seedWords, err := nip06.GenerateSeedWords()
 
-	if err != nil {
-		log.Println(err)
-		return
-	}
+  if err != nil {
+    return "", err
+  }
 
-	fmt.Println("seed:", seedWords)
-	fmt.Println("private key:", sk)
+  seed := nip06.SeedFromWords(seedWords)
+  sk, err :=nip06.PrivateKeyFromSeed(seed)
+
+  if err != nil {
+    return "", err
+  }
+
+  return sk, nil
 }
